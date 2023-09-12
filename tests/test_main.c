@@ -1,8 +1,7 @@
 #include <time.h>
 #include <stdlib.h>
 #include "unity.h"
-#include "windpoint.h"
-#include "station.h"
+#include "maputils.h"
 
 void tearDown(void)
 {
@@ -96,9 +95,36 @@ void test_direction_to_vector(void)
     TEST_ASSERT_EQUAL_FLOAT(-1, v.y);
 }
 
-void stations_influence_wpoint(void)
+void test_stations_influence_wpoint(void)
 {
-    // TODO: implement
+    Station s1 = {(Vector2){0, 5}, 45, 10};
+    Station s2 = {(Vector2){10, 5}, 315, 10};
+    Station* stations[] = {&s1, &s2};
+    WindPoint *wp = windpoint_new(5, 5);
+    stations_influence_wpoint(stations, 2, wp);
+    TEST_ASSERT_FLOAT_WITHIN(0.0001, 0, wp->speed.x);
+    TEST_ASSERT_FLOAT_WITHIN(0.0001, -0.1414214, wp->speed.y);
+
+    wp->pos = (Vector2){10, 5};
+    stations_influence_wpoint(stations, 2, wp);
+    TEST_ASSERT_FLOAT_WITHIN(0.0001, -0.007443218, wp->speed.x);
+    TEST_ASSERT_FLOAT_WITHIN(0.0001, -0.1414214, wp->speed.y);
+
+    s1.direction = 180;
+    stations_influence_wpoint(stations, 2, wp);
+    TEST_ASSERT_FLOAT_WITHIN(0.0001, -0.07443228, wp->speed.x);
+    TEST_ASSERT_FLOAT_WITHIN(0.0001, 0.02030455, wp->speed.y);
+
+    s2.direction = 180;
+    stations_influence_wpoint(stations, 2, wp);
+    TEST_ASSERT_FLOAT_WITHIN(0.0001, 0, wp->speed.x);
+    TEST_ASSERT_FLOAT_WITHIN(0.0001, 0.2, wp->speed.y);
+
+    s1.direction = 90;
+    s2.direction = 270;
+    stations_influence_wpoint(stations, 2, wp);
+    TEST_ASSERT_FLOAT_WITHIN(0.0001, -0.010526, wp->speed.x);
+    TEST_ASSERT_FLOAT_WITHIN(0.0001, 0, wp->speed.y);
 }
 
 int main(void)
@@ -109,5 +135,6 @@ int main(void)
     RUN_TEST(test_windpoint_expired);
     RUN_TEST(test_windpoint_new_rand);
     RUN_TEST(test_direction_to_vector);
+    RUN_TEST(test_stations_influence_wpoint);
     return UNITY_END();
 }

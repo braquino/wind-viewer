@@ -29,19 +29,20 @@ void clean_expired_windpoints(WindPoint* wpoints[], int length, int seconds_to_e
 
 void stations_influence_wpoint(Station* stations[], int stations_len, WindPoint* wp)
 {
-    double sum_distance = 0;
+    double sum_proximity = 0;
     double sum_x_product = 0;
     double sum_y_product = 0;
 
     for (int i=0; i<stations_len; i++)
     {
         Station* s = stations[i];
-        double distance = sqrt(pow(s->pos.x - wp->pos.x, 2) + pow(s->pos.y - wp->pos.x, 2));
-        sum_distance += distance;
+        double distance = sqrt(pow(s->pos.x - wp->pos.x, 2) + pow(s->pos.y - wp->pos.y, 2));
+        double proximity = fmax(MAX_DISTANCE - distance, 0.0) * 2;
+        sum_proximity += proximity;
         Vector2 v_direction = direction_to_vector(s->direction);
-        sum_x_product += v_direction.x * distance * s->wind_speed * WIND_SPEED_FACTOR;
-        sum_y_product += v_direction.y * distance * s->wind_speed * WIND_SPEED_FACTOR;
+        sum_x_product += v_direction.x * proximity * s->wind_speed * WIND_SPEED_FACTOR;
+        sum_y_product += v_direction.y * proximity * s->wind_speed * WIND_SPEED_FACTOR;
     }
-    if (sum_distance > 0)
-        wp->speed = (Vector2){sum_x_product / sum_distance, sum_y_product / sum_distance};
+    if (sum_proximity > 0)
+        wp->speed = (Vector2){sum_x_product / sum_proximity, sum_y_product / sum_proximity};
 }

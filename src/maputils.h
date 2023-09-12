@@ -5,7 +5,8 @@
 #include "station.h"
 #include "raylib.h"
 
-#define WIND_SPEED_FACTOR 20
+#define WIND_SPEED_FACTOR 0.02
+#define MAX_DISTANCE 100
 
 void populate_random_windpoints(WindPoint* wpoints[], int length, Rectangle area);
 
